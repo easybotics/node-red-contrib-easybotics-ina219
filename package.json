@@ -1,0 +1,35 @@
+{
+  "name": "node-red-contrib-easybotics-ina219",
+  "version": "0.5.0",
+  "description": "node-red wrapper for the ina219 repo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/easybotics/node-red-contrib-easybotics-ina219.git"
+  },
+  "keywords": [
+    "ina219",
+    "raspi",
+    "current",
+    "sensor",
+    "voltage",
+    "node-red"
+  ],
+  "dependencies": {
+    "ina219": "0.6.2"
+  },
+  "author": "easybotics",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/easybotics/node-red-contrib-easybotics-ina219/issues"
+  },
+  "homepage": "https://github.com/easybotics/node-red-contrib-easybotics-ina219#readme",
+  "node-red": {
+    "nodes": {
+      "ina": "ina.js"
+    }
+  }
+}

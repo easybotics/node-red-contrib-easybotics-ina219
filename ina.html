@@ -1,0 +1,58 @@
+<script type="text/javascript">
+	RED.nodes.registerType('ina-sensor-manager',
+		{
+			category: 'config',
+			defaults:
+			{
+				name: {value:""},
+			},
+
+			oneditprepare: function ()
+			{
+			},
+
+			icon: "arrow-in.png",
+			label: "ina Manager",
+		});
+</script>
+
+<script type="text/x-red" data-template-name="ina-sensor-manager">
+	<p>
+		<b> Polls sensor data and sends it to all the output nodes </b><br>
+	</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('ina-sensor', 
+		{
+			category: 'Sensor', 
+			color: '#D7A1D1',
+			defaults:
+			{
+				name: {value:""},
+				handle: {type: 'ina-sensor-manager', required: true},
+			},
+			inputs: 1, 
+			outputs: 2, 
+			icon: 'arrow-in.png', 
+			label: function()
+			{
+				return this.name || "INA219 V/A"
+			},
+		});
+</script>
+
+<script type="text/x-red" data-template-name="ina-sensor">
+	<div class = "form-row">
+		<label for="node-config-input-name"><i class="icon-tag"></i> Name </label>
+	</div>
+
+	<div class = "form-row">
+		<label for="node-config-input-handle"><i class= 'fa fa-tag'></i> Handle </label>
+		<input type = 'text' id='node-input-handle' />
+	</div>
+</script>
+
+
+
+
