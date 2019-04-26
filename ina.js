@@ -1,22 +1,66 @@
 var ina219 = require('ina219');
 
+//TODO:
+//settable address and update rate 
+//multiple sensors with different addresses
+
 module.exports = function(RED)
 {
+	class Mutex 
+	{
+		constructor() 
+		{
+			this._lock = Promise.resolve();
+		}
+
+		_acquire() 
+		{
+			var release;
+			const lock = this._lock = new Promise(resolve => {
+				release = resolve;
+			});
+			return release;
+		}
+
+		acquireQueued() 
+		{
+			const q = this._lock.then(() => release);
+			const release = this._acquire();
+			return q;
+		}
+	}
+
+	const mq = new Mutex();
 
 	function Handle (config)
 	{
 		RED.nodes.createNode(this, config)
 		
 		const node = this 
+
+		node.address = "auto" 
 		node.ending = false
 		node.vRegister = new Set()
 		node.aRegister = new Set()
+		node.lock = undefined
 		init()
+		
+		async function lock ()
+		{
+			node.lock = await mq.acquireQueued()
+			const addr = node.address === "auto" ? undefined : node.address
+			ina219.init(addr, 1)
+			ina219.calibrate32V1A(loop)
+		}
+
+		function unlock ()
+		{
+			node.lock()
+		}
 
 		function init ()
 		{
-			ina219.init()
-			ina219.calibrate32V1A (loop);
+			lock()
 		}
 
 		function close ()
@@ -45,7 +89,8 @@ module.exports = function(RED)
 			for(const n of node.aRegister)
 				n.aOutput(amps)
 
-			setTimeout(loop, 500)
+			unlock()
+			setTimeout(loop, 250)
 		}
 
 	}
