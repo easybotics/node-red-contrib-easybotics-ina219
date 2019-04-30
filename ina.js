@@ -37,9 +37,8 @@ module.exports = function(RED)
 		RED.nodes.createNode(this, config)
 		
 		const node = this 
-		const address = config.address
+		node.address = parseInt(config.address)
 
-		node.address = "auto" 
 		node.ending = false
 		node.vRegister = new Set()
 		node.aRegister = new Set()
@@ -49,8 +48,19 @@ module.exports = function(RED)
 		async function lock ()
 		{
 			node.lock = await mq.acquireQueued()
+			node.log("initing with address")
+			node.log(node.address)
 			ina219.init(node.address, 1)
-			ina219.calibrate32V1A(loop)
+			try 
+			{
+				ina219.calibrate32V1A(loop)
+			}
+			catch (e)
+			{
+				node.error(e)
+				node.log("no device on this address??")
+				unlock()
+			}
 		}
 
 		function unlock ()
