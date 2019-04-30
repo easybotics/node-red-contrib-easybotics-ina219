@@ -75,6 +75,7 @@ module.exports = function(RED)
 
 		function close ()
 		{
+			unlock()
 			node.ending = true;
 		}
 
@@ -82,7 +83,11 @@ module.exports = function(RED)
 
 		function loop ()
 		{
-			if(node.ending) return;
+			if(node.ending)
+			{
+				unlock()
+				return
+			}
 			ina219.getBusVoltage_V(sendV);
 		}
 
@@ -100,7 +105,7 @@ module.exports = function(RED)
 				n.aOutput(amps)
 
 			unlock()
-			setTimeout(loop, 250)
+			setTimeout(lock, 250)
 		}
 
 	}
