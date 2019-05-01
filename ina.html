@@ -40,6 +40,15 @@
 	</p>
 </script>
 
+<script type="text/x-red" data-help-name="ina-sensor-manager">
+	<p>
+		Polls a ina-219 on i2c dev 1<br>
+		<a href="https://www.ti.com/lit/ds/symlink/ina219.pdf"> ina-210 </a> can be wired for four different addresses which can be chosen from the dropdown <br>
+		Sample rate can also be adjusted <br>
+		Calibrated for 32v 1amp <br>
+	</p>
+</script>
+
 <script type="text/javascript">
 	RED.nodes.registerType('ina-sensor', 
 		{
@@ -71,6 +80,12 @@
 	</div>
 </script>
 
-
+<script type="text/x-red" data-help-name="ina-sensor">
+	<p>
+		Top output is voltage <br>
+		Bottom output is milliamps <br>
+		Calibrated for 32v 1amp <br>
+	</p>
+</script>
 
  
