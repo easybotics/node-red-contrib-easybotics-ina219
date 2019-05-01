@@ -5,7 +5,8 @@
 			defaults:
 			{
 				name: {value:""},
-				address: {value: 0x40, required: true}
+				address: {value: 0x40, required: true},
+				delay:	{value: 250, required: true},
 			},
 
 			oneditprepare: function ()
@@ -26,6 +27,10 @@
 			<option value=0x44> 0x44 </option>
 			<option value=0x45> 0x45 </option>
 		</select>
+	</div>
+	<div class="form-row">
+		<label for="node-config-input-delay"><i class= "icon-bookmkark"></i>Delay between samples in ms</label>
+		<input type="number" id="node-config-input-delay" min="5" placeholder="250 milliseconds"/>
 	</div>
 </script>
 
@@ -68,4 +73,4 @@
 
 
 
-
+ 
