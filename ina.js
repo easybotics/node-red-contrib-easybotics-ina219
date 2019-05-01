@@ -1,4 +1,4 @@
-var ina219 = require('ina219');
+var ina219 = require('ina219')
 
 //TODO:
 //settable address and update rate 
@@ -10,27 +10,27 @@ module.exports = function(RED)
 	{
 		constructor() 
 		{
-			this._lock = Promise.resolve();
+			this._lock = Promise.resolve()
 		}
 
 		_acquire() 
 		{
-			var release;
+			var release
 			const lock = this._lock = new Promise(resolve => {
-				release = resolve;
-			});
-			return release;
+				release = resolve
+			})
+			return release
 		}
 
 		acquireQueued() 
 		{
-			const q = this._lock.then(() => release);
-			const release = this._acquire();
-			return q;
+			const q = this._lock.then(() => release)
+			const release = this._acquire()
+			return q
 		}
 	}
 
-	const mq = new Mutex();
+	const mq = new Mutex()
 
 	function Handle (config)
 	{
@@ -38,6 +38,7 @@ module.exports = function(RED)
 		
 		const node = this 
 		node.address = parseInt(config.address)
+		node.delay   = parseInt(config.delay)
 
 		node.ending = false
 		node.vRegister = new Set()
@@ -48,7 +49,7 @@ module.exports = function(RED)
 		async function lock ()
 		{
 			node.lock = await mq.acquireQueued()
-			node.log("initing with address")
+			node.log('initing with address')
 			node.log(node.address)
 			ina219.init(node.address, 1)
 			try 
@@ -58,7 +59,7 @@ module.exports = function(RED)
 			catch (e)
 			{
 				node.error(e)
-				node.log("no device on this address??")
+				node.log('no device on this address??')
 				unlock()
 			}
 		}
@@ -76,10 +77,10 @@ module.exports = function(RED)
 		function close ()
 		{
 			unlock()
-			node.ending = true;
+			node.ending = true
 		}
 
-		node.on('close', close);
+		node.on('close', close)
 
 		function loop ()
 		{
@@ -88,7 +89,7 @@ module.exports = function(RED)
 				unlock()
 				return
 			}
-			ina219.getBusVoltage_V(sendV);
+			ina219.getBusVoltage_V(sendV)
 		}
 
 		function sendV (voltage)
@@ -105,44 +106,44 @@ module.exports = function(RED)
 				n.aOutput(amps)
 
 			unlock()
-			setTimeout(lock, 250)
+			setTimeout(lock, node.delay)
 		}
 
 	}
 
-function inaSensor (config)
-{
-	RED.nodes.createNode(this, config)
-	const node = this
-
-	v = undefined
-	a = undefined
-
-	node.handle = RED.nodes.getNode(config.handle)
-	node.handle.aRegister.add(node)
-	node.handle.vRegister.add(node)
-
-	node.vOutput = function (voltage)
+	function inaSensor (config)
 	{
-		v = voltage;
-		if(v == undefined || a == undefined) return;
+		RED.nodes.createNode(this, config)
+		const node = this
 
-		const msg0 = {payload: v, topic: "voltage"}
-		const msg1 = {payload: a, topic: "miliamps"}
-		node.send([msg0, msg1])
+		var v = undefined
+		var a = undefined
+
+		node.handle = RED.nodes.getNode(config.handle)
+		node.handle.aRegister.add(node)
+		node.handle.vRegister.add(node)
+
+		node.vOutput = function (voltage)
+		{
+			v = voltage
+			if(v == undefined || a == undefined) return
+
+			const msg0 = {payload: v, topic: 'voltage'}
+			const msg1 = {payload: a, topic: 'miliamps'}
+			node.send([msg0, msg1])
+		}
+
+
+		node.aOutput = function (amps)
+		{
+			a = amps
+			if(v == undefined || a == undefined) return
+
+			const msg0 = {payload: v, topic: 'voltage'}
+			const msg1 = {payload: a, topic: 'miliamps'}
+			node.send([msg0, msg1])
+		}
 	}
-
-
-	node.aOutput = function (amps)
-	{
-		a = amps;
-		if(v == undefined || a == undefined) return;
-
-		const msg0 = {payload: v, topic: "voltage"}
-		const msg1 = {payload: a, topic: "miliamps"}
-		node.send([msg0, msg1])
-	}
-}
 
 	RED.nodes.registerType('ina-sensor-manager', Handle)
 	RED.nodes.registerType('ina-sensor', inaSensor)
