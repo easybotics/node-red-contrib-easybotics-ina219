@@ -55,7 +55,10 @@ module.exports = function(RED)
 			//lets try and close the file descriptor first
 			try 
 			{
-				if(ina219.wire) ina219.wire.closeSync()
+				if(ina219.wire) 
+				{
+					ina219.wire.closeSync()
+				}
 			}
 			catch (e)
 			{
