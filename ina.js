@@ -51,6 +51,18 @@ module.exports = function(RED)
 			node.lock = await mq.acquireQueued()
 			node.log('initing with address')
 			node.log(node.address)
+
+			//lets try and close the file descriptor first
+			try 
+			{
+				if(ina219.wire) ina219.wire.closeSync()
+			}
+			catch (e)
+			{
+				node.error(e)
+			}
+
+
 			ina219.init(node.address, 1)
 			try 
 			{
@@ -129,7 +141,9 @@ module.exports = function(RED)
 			if(v == undefined || a == undefined) return
 
 			const msg0 = {payload: v, topic: 'voltage'}
-			const msg1 = {payload: a, topic: 'miliamps'}
+			//const msg1 = {payload: a, topic: 'miliamps'}
+			//don't send unwated messages from other output
+			const msg1 = null
 			node.send([msg0, msg1])
 		}
 
@@ -139,7 +153,8 @@ module.exports = function(RED)
 			a = amps
 			if(v == undefined || a == undefined) return
 
-			const msg0 = {payload: v, topic: 'voltage'}
+		//	const msg0 = {payload: v, topic: 'voltage'}
+			const msg0 = null
 			const msg1 = {payload: a, topic: 'miliamps'}
 			node.send([msg0, msg1])
 		}
