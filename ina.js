@@ -4,6 +4,13 @@ var ina219 = require('ina219')
 //settable address and update rate 
 //multiple sensors with different addresses
 
+//smash js floats down to a fixed 
+function smashNum (num) 
+{
+	return parseFloat(parseFloat(Math.round(num * 100) / 100).toFixed(2));
+}
+
+
 module.exports = function(RED)
 {
 	class Mutex 
@@ -41,17 +48,14 @@ module.exports = function(RED)
 		node.delay   = parseInt(config.delay)
 
 		node.ending = false
-		node.vRegister = new Set()
-		node.aRegister = new Set()
+		node.mvRegister = new Set()
+		node.maRegister = new Set()
 		node.lock = undefined
 		init()
 		
 		async function lock ()
 		{
 			node.lock = await mq.acquireQueued()
-			node.log('initing with address')
-			node.log(node.address)
-
 			//lets try and close the file descriptor first
 			try 
 			{
@@ -109,7 +113,7 @@ module.exports = function(RED)
 
 		function sendV (voltage)
 		{
-			for(const n of node.vRegister)
+			for(const n of node.mvRegister)
 				n.vOutput(voltage)
 
 			ina219.getCurrent_mA(sendMa)
@@ -117,7 +121,7 @@ module.exports = function(RED)
 
 		function sendMa (amps)
 		{
-			for(const n of node.aRegister)
+			for(const n of node.maRegister)
 				n.aOutput(amps)
 
 			unlock()
@@ -135,12 +139,12 @@ module.exports = function(RED)
 		var a = undefined
 
 		node.handle = RED.nodes.getNode(config.handle)
-		node.handle.aRegister.add(node)
-		node.handle.vRegister.add(node)
+		node.handle.maRegister.add(node)
+		node.handle.mvRegister.add(node)
 
 		node.vOutput = function (voltage)
 		{
-			v = voltage
+			v = smashNum(voltage)
 			if(v == undefined || a == undefined) return
 
 			const msg0 = {payload: v, topic: 'voltage'}
@@ -153,15 +157,22 @@ module.exports = function(RED)
 
 		node.aOutput = function (amps)
 		{
-			a = amps
+			a = smashNum(amps)
 			if(v == undefined || a == undefined) return
 
-		//	const msg0 = {payload: v, topic: 'voltage'}
+			//const msg0 = {payload: v, topic: 'voltage'}
 			const msg0 = null
 			const msg1 = {payload: a, topic: 'miliamps'}
 			node.send([msg0, msg1])
 		}
+
+		node.on('close', function()
+		{
+			node.handle.maRegister.remove(node)
+			node.handle.mvRegister.remove(node)
+		})
 	}
+
 
 	RED.nodes.registerType('ina-sensor-manager', Handle)
 	RED.nodes.registerType('ina-sensor', inaSensor)
