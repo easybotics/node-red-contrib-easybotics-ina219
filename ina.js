@@ -168,8 +168,8 @@ module.exports = function(RED)
 
 		node.on('close', function()
 		{
-			node.handle.maRegister.remove(node)
-			node.handle.mvRegister.remove(node)
+			node.handle.maRegister.delete(node)
+			node.handle.mvRegister.delete(node)
 		})
 	}
 
