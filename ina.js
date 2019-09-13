@@ -73,7 +73,7 @@ module.exports = function(RED)
 			ina219.init(node.address, 1)
 			try 
 			{
-				ina219.calibrate32V1A(loop)
+				ina219.calibrate32V2A(loop)
 			}
 			catch (e)
 			{
