@@ -78,7 +78,7 @@ module.exports = function(RED)
 			catch (e)
 			{
 				node.error(e)
-				node.log('no device on this address??')
+				node.log('no device on this address?')
 				unlock()
 			}
 		}
