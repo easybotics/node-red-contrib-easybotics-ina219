@@ -46,7 +46,10 @@ module.exports = function(RED)
 		const node = this 
 		node.address = parseInt(config.address)
 		node.delay   = parseInt(config.delay)
+		node.ohms	 = parseFloat(config.ohms)
+		node.customResistor = config.customResistor
 
+	
 		node.ending = false
 		node.mvRegister = new Set()
 		node.maRegister = new Set()
@@ -73,7 +76,12 @@ module.exports = function(RED)
 			ina219.init(node.address, 1)
 			try 
 			{
-				ina219.calibrate32V2A(loop)
+				console.log(node.ohms)
+				console.log(node.customResistor)
+
+				console.log("initing!")
+				if(node.customResistor) ina219.calibrate32V2AResistor(node.ohms, loop)
+				else ina219.calibrate32V2A(loop)
 			}
 			catch (e)
 			{
