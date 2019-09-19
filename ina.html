@@ -7,6 +7,8 @@
 				name: {value:""},
 				address: {value: 0x40, required: true},
 				delay:	{value: 250, required: true},
+				ohms:   {value:0.01},
+				customResistor: {value:false},
 			},
 
 			oneditprepare: function ()
@@ -32,6 +34,17 @@
 		<label for="node-config-input-delay"><i class= "icon-bookmkark"></i>Delay between samples in ms</label>
 		<input type="number" id="node-config-input-delay" min="5" placeholder="250 milliseconds"/>
 	</div>
+
+	<div class='form-row'>
+		<label for="node-config-input-customResistor"><i class='fa fa-tag'></i>Filled</label>
+		<input type='checkbox' id='node-config-input-customResistor' style='width: auto;'/>
+	</div>
+
+	<div class='form-row'	<div class='form-row'>
+		<label for='node-config-input-ohms'><i class='fa fa-tag'></i> ohms </label>
+		<input type='number' id="node-config-input-ohms" min='0' step="any" placeholder='0.01' />
+	</div>
+
 </script>
 
 <script type="text/x-red" data-template-name="ina-sensor-manager">
