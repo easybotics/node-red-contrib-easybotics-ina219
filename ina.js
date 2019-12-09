@@ -1,4 +1,4 @@
-var ina219 = require('ina219')
+var ina219 = require('easybotics-ina219')
 
 //TODO:
 //settable address and update rate 
