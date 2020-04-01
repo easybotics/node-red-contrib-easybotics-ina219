@@ -13,6 +13,10 @@ function smashNum (num)
 
 module.exports = function(RED)
 {
+	//a mutex is a syncronization primitive that allows only one user to lock it at a time
+	//everyone else will have to wait in line
+	//this isnt a true mutex, because js isn't actually multithreaded but simply out of order execution
+	//it isnt possible to have a race condition in js, but you can still have a need for a mutex which is why we have one here :) 
 	class Mutex 
 	{
 		constructor() 
@@ -37,25 +41,36 @@ module.exports = function(RED)
 		}
 	}
 
+	//here is the mutex we'll be using
 	const mq = new Mutex()
 
+	//this is a config node t
 	function Handle (config)
 	{
 		RED.nodes.createNode(this, config)
 		
 		const node = this 
+		//the config state for this sensor 
 		node.address = parseInt(config.address)
 		node.delay   = parseInt(config.delay)
 		node.ohms	 = parseFloat(config.ohms)
 		node.customResistor = config.customResistor
 
 	
+		//the state for running the node
+		//the two sets are where nodes will register themselves if they want to be pinged for data
+		//the ending flag is true when the node wants to shut down 
 		node.ending = false
 		node.mvRegister = new Set()
 		node.maRegister = new Set()
 		node.lock = undefined
 		init()
 		
+		//we only want one function accessing the sensor at a time
+		//which is why we use a 'mutex'
+		//this function tries to create a connection to the ina sensor
+		//we constantly reconnect in our loop
+		//todo:: try and remember why we use the INA node in this way...
 		async function lock ()
 		{
 			node.lock = await mq.acquireQueued()
@@ -109,6 +124,7 @@ module.exports = function(RED)
 
 		node.on('close', close)
 
+		//here's our loop
 		function loop ()
 		{
 			if(node.ending)
@@ -119,6 +135,7 @@ module.exports = function(RED)
 			ina219.getBusVoltage_V(sendV)
 		}
 
+		//here we send data to the nodes that registered for it 
 		function sendV (voltage)
 		{
 			for(const n of node.mvRegister)
@@ -138,6 +155,7 @@ module.exports = function(RED)
 
 	}
 
+	//here is the node that registers itself with the config node 
 	function inaSensor (config)
 	{
 		RED.nodes.createNode(this, config)
